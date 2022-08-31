@@ -23,6 +23,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Flutter Chat',
         theme: ThemeData(
+                textTheme:
+                    const TextTheme(headline1: TextStyle(color: Colors.white)),
                 primarySwatch: Colors.pink,
                 backgroundColor: Colors.pink,
                 buttonTheme: ButtonTheme.of(context).copyWith(
