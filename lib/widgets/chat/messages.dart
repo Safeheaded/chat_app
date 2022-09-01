@@ -20,6 +20,7 @@ class Messages extends StatelessWidget {
             reverse: true,
             itemBuilder: ((context, index) {
               return MessageBubble(
+                username: chatDocs[index]['username'],
                 message: chatDocs[index]['text'],
                 isAuthor: chatDocs[index]['userId'] == user!.uid,
                 key: ValueKey(chatDocs[index].id),
