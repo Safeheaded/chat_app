@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:chat_app/widgets/auth/auth_form.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -14,8 +17,8 @@ class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
   var _isLoading = false;
 
-  Future<void> _submitAuthForm(
-      String email, String password, String? username, bool isLogin) async {
+  Future<void> _submitAuthForm(String email, String password, String? username,
+      File? userImageFile, bool isLogin) async {
     UserCredential userCredential;
     setState(() {
       _isLoading = true;
@@ -27,10 +30,20 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         userCredential = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
+
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_image')
+            .child('${userCredential.user!.uid}.jpg');
+
+        await ref.putFile(userImageFile!);
+
+        final url = await ref.getDownloadURL();
+
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user?.uid)
-            .set({'username': username, 'email': email});
+            .set({'username': username, 'email': email, 'image_url': url});
       }
     } on FirebaseAuthException catch (error) {
       var message = 'Your password or email is incorrect';
@@ -43,6 +56,8 @@ class _AuthScreenState extends State<AuthScreen> {
         content: Text(message),
         backgroundColor: Theme.of(context).errorColor,
       ));
+    } on FirebaseException catch (error) {
+      print(error);
     } catch (error) {
       print(error);
     } finally {
